@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>FPS ARENA</title>
+    <meta name="description" content="FPS ARENA — браузерный тактический шутер: бой с ботами, дуэль 1×1, команды 10×10." />
+    <meta name="theme-color" content="#0b0e13" />
+    <!-- The crosshair mark from FPS Arena, inlined so there is no extra request. -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTMiIGZpbGw9IiMwZTEyMTgiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIyMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjgzMDNjIiBzdHJva2Utd2lkdGg9IjYiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTg1MDNhIiBzdHJva2Utd2lkdGg9IjIuNSIvPjxyZWN0IHg9IjMwLjYiIHk9IjUiIHdpZHRoPSIyLjgiIGhlaWdodD0iMTUiIGZpbGw9IiNlODUwM2EiLz48cmVjdCB4PSIzMC42IiB5PSI0NCIgd2lkdGg9IjIuOCIgaGVpZ2h0PSIxNSIgZmlsbD0iI2U4NTAzYSIvPjxyZWN0IHg9IjUiIHk9IjMwLjYiIHdpZHRoPSIxNSIgaGVpZ2h0PSIyLjgiIGZpbGw9IiNlODUwM2EiLz48cmVjdCB4PSI0NCIgeT0iMzAuNiIgd2lkdGg9IjE1IiBoZWlnaHQ9IjIuOCIgZmlsbD0iI2U4NTAzYSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjMuNCIgZmlsbD0iI2ZmZDIzYSIvPjwvc3ZnPgo=" />
+    <style>
+      :root { color-scheme: dark; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+      body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      #game { display: block; width: 100vw; height: 100vh; touch-action: none; cursor: none; }
+    </style>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="ui"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
