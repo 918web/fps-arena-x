@@ -17,6 +17,7 @@ import { specFor } from '../models/specs.js';
 import { ATTACHMENTS, SLOT_ORDER, canMount, defaultLoadout, resolveStats } from '../attachments.js';
 import { LIGHT_POOL, clearanceIssues, placementsFor } from './specs.js';
 import { buildAttachmentUnit, addMountingRails } from './build.js';
+import { meshifyAssembly } from '../mesh.js';
 
 const _dir = new THREE.Vector3();
 const _pos = new THREE.Vector3();
@@ -96,10 +97,10 @@ export class HardwareRig {
     let unit = this.cache.get(key);
     if (!unit) {
       unit = buildAttachmentUnit(this.spec, attId);
-      unit.object = unit.assembly.build(this.materialFor);
+      unit.object = meshifyAssembly(unit.assembly, this.materialFor);
       if (unit.legs) {
         for (const leg of unit.legs) {
-          leg.object = leg.assembly.build(this.materialFor);
+          leg.object = meshifyAssembly(leg.assembly, this.materialFor);
           leg.object.position.set(leg.pivot[0], leg.pivot[1], leg.pivot[2]);
           leg.object.rotation.z = leg.stowedAngle;
           unit.object.add(leg.object);
