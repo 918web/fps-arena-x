@@ -229,6 +229,7 @@ export const ATTACHMENTS = {
     slot: 'magazine',
     label: 'Штатный магазин',
     labelLatin: 'Standard mag',
+    note: 'Заводская ёмкость и баланс. Ничего не отнимает и ничего не даёт.',
     detachable: false,
     kind: 'mag',
     mass: 0,
