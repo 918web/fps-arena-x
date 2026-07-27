@@ -131,6 +131,21 @@ async function contract() {
 
   group('engine contract: subsystem isolation');
   const KIT_FILES = new Set(['weapons/geometry.js', 'weapons/parts.js', 'weapons/mathx.js']);
+  /**
+   * Stateless leaf libraries. `ui/util.js` is DOM/easing/math primitives with no
+   * subsystem state — the HUD itself treats it as a library, and re-implementing
+   * el()/damp() per subsystem is how two design systems start to drift apart.
+   */
+  const LEAF_FILES = new Set([...KIT_FILES, 'ui/util.js']);
+  /**
+   * Declared dependencies between the new layers.
+   *
+   * `shell -> arsenal` is deliberate: the gunsmith board IS the arsenal's
+   * presentation layer, and routing weapon data through ctx would be indirection
+   * with no isolation benefit. The edge is one-way — the check below proves the
+   * arsenal never imports the shell, so the arsenal stays usable headless.
+   */
+  const ALLOWED_EDGES = new Map([['shell', new Set(['arsenal'])]]);
   const SUBSYSTEM_DIRS = new Set([
     ...NEW_DIRS, 'ai', 'audio', 'fx', 'materials', 'physics', 'player', 'render', 'sky', 'ui', 'weapons', 'world',
   ]);
@@ -145,9 +160,30 @@ async function contract() {
       if (!SUBSYSTEM_DIRS.has(owner) || owner === mine) continue;
       // The parts kit is a stateless geometry library that the base engine's own
       // models import the same way; it holds no subsystem state to reach into.
-      if (KIT_FILES.has(target)) continue;
+      if (LEAF_FILES.has(target)) continue;
+      if (ALLOWED_EDGES.get(mine)?.has(owner)) continue;
       check(`${rel} does not reach into ${owner}/`, () => {
         assert(false, `cross-subsystem import of ${owner}/: use ctx.get('${owner}') instead`);
+      });
+    }
+  }
+
+  // The allowed edges must stay one-way, or the "arsenal runs headless" property
+  // that the whole test gate depends on quietly dies.
+  for (const [consumer, providers] of ALLOWED_EDGES) {
+    for (const provider of providers) {
+      check(`${provider}/ never imports ${consumer}/ back`, () => {
+        for (const file of NEW) {
+          if (relative(SRC, file).split('/')[0] !== provider) continue;
+          const code = readFileSync(file, 'utf8');
+          for (const m of code.matchAll(/from\s+['"](\.[^'"]+)['"]/g)) {
+            const target = relative(SRC, resolve(dirname(file), m[1]));
+            assert(
+              target.split('/')[0] !== consumer,
+              `${relative(ROOT, file)} imports ${consumer}/ — the dependency must stay one-way`
+            );
+          }
+        }
       });
     }
   }
