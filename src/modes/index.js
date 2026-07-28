@@ -68,7 +68,7 @@ export class ModesSystem {
       difficulty: this.difficulty,
       rng: () => this.rng.float(),
     });
-    this.match.addPlayer({ id: YOU, name: '\u0412\u042b', team: 0 });
+    this.match.addPlayer({ id: YOU, name: 'ВЫ', team: 0 });
 
     this.root = new THREE.Group();
     this.root.name = 'modes';
@@ -188,7 +188,7 @@ export class ModesSystem {
     const rec = { id: d.id, agent, wave: d.wave, role: d.role };
     this.bots.push(rec);
     this._byAgent.set(agent, rec);
-    this.match.addPlayer({ id: d.id, name: `\u0411\u041e\u0422 ${d.id.slice(3)}`, team: 1, bot: true });
+    this.match.addPlayer({ id: d.id, name: `БОТ ${d.id.slice(3)}`, team: 1, bot: true });
     return rec;
   }
 
@@ -225,7 +225,7 @@ export class ModesSystem {
     const pending = this.reserve;
     this.reserve = [];
     for (const d of pending) this.#deploy({ ...d, role: roleFor(d.wave + this.bots.length) });
-    this.ctx.peek('ui')?.banner?.show('\u041f\u041e\u0414\u041a\u0420\u0415\u041f\u041b\u0415\u041d\u0418\u0415', `+${pending.length} \u043f\u0440\u043e\u0442\u0438\u0432\u043d\u0438\u043a\u043e\u0432`, 2.6);
+    this.ctx.peek('ui')?.banner?.show('ПОДКРЕПЛЕНИЕ', `+${pending.length} противников`, 2.6);
   }
 
   /* =================================================================== */
@@ -290,7 +290,7 @@ export class ModesSystem {
         f.group.position.copy(f.enemyBase);
         this.match.capture(YOU);
         this.ctx.events.emit('modes:capture', { by: YOU });
-        this.ctx.peek('ui')?.banner?.show('\u0424\u041b\u0410\u0413 \u0417\u0410\u0425\u0412\u0410\u0427\u0415\u041d', `+${500} \u043e\u0447\u043a\u043e\u0432`, 3.2);
+        this.ctx.peek('ui')?.banner?.show('ФЛАГ ЗАХВАЧЕН', `+${500} очков`, 3.2);
       }
       return;
     }
@@ -301,7 +301,7 @@ export class ModesSystem {
         f.state = 'base';
         f.droppedFor = 0;
         f.group.position.copy(f.enemyBase);
-        this.ctx.peek('ui')?.banner?.show('\u0424\u041b\u0410\u0413 \u0412\u0415\u0420\u041d\u0423\u041b\u0421\u042f', '\u041d\u0430 \u0431\u0430\u0437\u0435 \u0432\u0440\u0430\u0433\u0430', 2.4);
+        this.ctx.peek('ui')?.banner?.show('ФЛАГ ВЕРНУЛСЯ', 'На базе врага', 2.4);
       }
     }
 
@@ -310,7 +310,7 @@ export class ModesSystem {
       f.state = 'carried';
       f.droppedFor = 0;
       this.match.award(YOU, 'flagPickup');
-      this.ctx.peek('ui')?.banner?.show('\u0424\u041b\u0410\u0413 \u0412\u0417\u042f\u0422', '\u041d\u0435\u0441\u0438 \u043d\u0430 \u0441\u0432\u043e\u044e \u0431\u0430\u0437\u0443', 2.8);
+      this.ctx.peek('ui')?.banner?.show('ФЛАГ ВЗЯТ', 'Неси на свою базу', 2.8);
     }
   }
 
@@ -334,7 +334,7 @@ export class ModesSystem {
     this.match.registerKill({ killer: YOU, victim: rec.id, headshot: !!e.headshot, weapon: e.weapon ?? null });
     const me = this.match.players.get(YOU);
     if (me && me.streak > 0 && me.streak % 3 === 0) {
-      this.ctx.peek('ui')?.banner?.show(`\u0421\u0415\u0420\u0418\u042f \u00d7${me.streak}`, '\u0411\u0435\u0437 \u0441\u043c\u0435\u0440\u0442\u0435\u0439', 2.2);
+      this.ctx.peek('ui')?.banner?.show(`СЕРИЯ ×${me.streak}`, 'Без смертей', 2.2);
     }
     if (this.modeId === 'bots' && this.submode === 'dm' && this.aliveBots() === 0) {
       this.match.fieldCleared();
@@ -397,7 +397,7 @@ export class ModesSystem {
         scoreUs: m.teams.get(0).kills,
         scoreThem: this.aliveBots(),
         timeLeft: m.timeLeft(),
-        mode: this.submode === 'ctf' ? '\u0417\u0410\u0425\u0412\u0410\u0422 \u0424\u041b\u0410\u0413\u0410' : 'DEATHMATCH',
+        mode: this.submode === 'ctf' ? 'ЗАХВАТ ФЛАГА' : 'DEATHMATCH',
       });
       return;
     }
@@ -413,10 +413,69 @@ export class ModesSystem {
     const m = this.match;
     const snap = this.snapshot();
     const won = m.winner === 0;
-    const title = m.winner === null ? '\u041d\u0418\u0427\u042c\u042f' : won ? '\u041f\u041e\u0411\u0415\u0414\u0410' : '\u041f\u041e\u0420\u0410\u0416\u0415\u041d\u0418\u0415';
+    const title = m.winner === null ? 'НИЧЬЯ' : won ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ';
     const mvp = snap.mvp;
-    this.ctx.peek('ui')?.banner?.show(title, mvp ? `\u041b\u0423\u0427\u0428\u0418\u0419: ${mvp.name} \u00b7 ${mvp.score}` : '', 6);
+    this.ctx.peek('ui')?.banner?.show(title, mvp ? `ЛУЧШИЙ: ${mvp.name} · ${mvp.score}` : '', 6);
     this.ctx.events.emit('modes:over', snap);
+  }
+
+  /* ---------------- bridge from src/net ----------------
+   * In duel and squad the RELAY is the authority: it counts the rounds, it
+   * decides when the match is over and it may run a different format than
+   * rules.js defaults to. These entry points let net/ write those verdicts
+   * into the same Match object that bots mode drives locally, so the HUD,
+   * the scoreboard and the end screen keep exactly one source of truth. */
+
+  adoptRemoteFormat(o = {}) {
+    if (Number.isFinite(o.roundsToWin) && o.roundsToWin > 0) {
+      this.match.roundsToWin = o.roundsToWin;
+    }
+    if (o.team === 0 || o.team === 1) {
+      const me = this.match.players.get(YOU);
+      if (me) me.team = o.team;
+    }
+    return this.match.roundsToWin;
+  }
+
+  addRemotePlayer(o = {}) {
+    if (!o.id || this.match.players.has(o.id)) return null;
+    return this.match.addPlayer({ id: o.id, name: o.name || o.id, team: o.team ?? 1, bot: false });
+  }
+
+  /* Squad: the relay already de-duplicated the death with its own +2/+3
+   * guard, so this is scored once and never re-derived from actor:death. */
+  remoteKill(o = {}) {
+    if (!o.victim || !this.match.players.has(o.victim)) return null;
+    if (o.killer && !this.match.players.has(o.killer)) {
+      const vt = this.match.players.get(o.victim)?.team ?? 0;
+      this.addRemotePlayer({ id: o.killer, name: o.killer, team: 1 - vt });
+    }
+    return this.match.registerKill({ killer: o.killer || null, victim: o.victim });
+  }
+
+  /* Duel: a round ended. The relay sends ABSOLUTE scores, so we assign them
+   * rather than incrementing - one dropped message would desync a counter. */
+  remoteRoundOver(o = {}) {
+    if (Number.isFinite(o.roundsToWin) && o.roundsToWin > 0) this.match.roundsToWin = o.roundsToWin;
+    if (o.victim) this.remoteKill(o);
+    const myName = this.match.players.get(YOU)?.name;
+    for (const [nick, wins] of Object.entries(o.scores || {})) {
+      const id = nick === myName ? YOU : nick;
+      const team = this.match.players.get(id)?.team;
+      const t = team === undefined ? null : this.match.teams.get(team);
+      if (t) t.rounds = wins;
+    }
+    return this.match.round;
+  }
+
+  remoteMatchOver(o = {}) {
+    const me = this.match.players.get(YOU);
+    const mine = o.winner && me ? o.winner === me.name : null;
+    this.match.state = 'over';
+    this.match.endReason = 'remote';
+    this.match.winner = mine === null ? null : mine ? me.team : 1 - me.team;
+    this.#announceEnd();
+    return this.match.winner;
   }
 
   snapshot() {
