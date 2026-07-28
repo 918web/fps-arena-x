@@ -28,7 +28,7 @@ function check(label, fn) {
   try {
     fn();
     passed += 1;
-    console.log(`  \u2713 ${label}`);
+    console.log(`  \\u2713 ${label}`);
   } catch (err) {
     failures.push(`${current} / ${label}: ${err.message}`);
     console.log(`  x ${label}`);
@@ -49,7 +49,7 @@ const M = await load('src/modes/match.js');
 /** A fresh match with N bots on side 1, already live. */
 function seed(o, bots = 0) {
   const m = new M.Match(o).start();
-  m.addPlayer({ id: 'you', name: '\u0412\u042b', team: 0 });
+  m.addPlayer({ id: 'you', name: '\\u0412\\u042b', team: 0 });
   for (let i = 0; i < bots; i++) m.addPlayer({ id: `b${i}`, team: 1, bot: true });
   return m;
 }
@@ -405,7 +405,11 @@ check('fire rate is DIVIDED by the difficulty multiplier, not multiplied', () =>
 
 check('a death is scored exactly once', () => {
   const hits = [...SRC.matchAll(/registerKill\(/g)].length;
-  assert(hits === 2, `registerKill is called ${hits} times: expected one for bots and one for the player`);
+  // Three scoring paths, no more: a bot dying locally, the local player dying,
+  // and a kill reported by the relay. A fourth would mean a duplicated award.
+  assert(hits === 3, `registerKill is called ${hits} times: expected bots, the local player and the relay bridge`);
+  const remote = SRC.slice(SRC.indexOf('  remoteKill('), SRC.indexOf('  remoteRoundOver('));
+  assert((remote.match(/registerKill/g) || []).length === 1, 'the relay bridge scores more than once');
   const handler = SRC.slice(SRC.indexOf('#onActorDeath(e) {'), SRC.indexOf('#playerDied()'));
   assert(!/killfeed\.push/.test(handler), 'the HUD already draws its own row off actor:death');
 });
@@ -446,8 +450,8 @@ check('dying with the flag drops it where you fell', () => {
 
 console.log(`\n${'-'.repeat(WIDTH)}`);
 if (failures.length) {
-  console.log(`FAILED \u2014 ${failures.length} of ${passed + failures.length} checks`);
-  for (const f of failures) console.log(`  \u00b7 ${f}`);
+  console.log(`FAILED \\u2014 ${failures.length} of ${passed + failures.length} checks`);
+  for (const f of failures) console.log(`  \\u00b7 ${f}`);
   process.exit(1);
 }
-console.log(`all green \u2014 ${passed} mode checks passed`);
+console.log(`all green \\u2014 ${passed} mode checks passed`);
