@@ -5,11 +5,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 4173",
-    "test": "node tools/verify-arena.mjs && node tools/verify-hardware.mjs && node tools/verify-gunsmith.mjs && node tools/verify-modes.mjs && node tools/verify-net.mjs && node tools/verify-shell.mjs",
+    "test": "node tools/verify-arena.mjs && node tools/verify-hardware.mjs && node tools/verify-gunsmith.mjs && node tools/verify-modes.mjs && node tools/verify-net.mjs && node tools/verify-shell.mjs && node tools/verify-all.mjs",
     "shot": "node tools/capture.mjs"
   },
   "author": "918web",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "three": "^0.180.0"
